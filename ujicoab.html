@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Foto Properti</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+        
+        .property-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .property-info {
+            padding: 1.2rem;
+        }
+        
+        .property-type {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .property-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .property-address {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #e74c3c;
+            background-color: #fadbd8;
+            border-radius: 8px;
+            margin: 2rem;
+            grid-column: 1 / -1;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Galeri Foto Properti</h1>
+        <p class="subtitle">Koleksi foto properti terbaru</p>
+    </header>
+    
+    <div class="gallery" id="gallery-container">
+        <div class="loading">Memuat foto properti...</div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2023 Galeri Properti. Semua hak cipta dilindungi.</p>
+    </footer>
+
+    <script>
+        // Data contoh properti (akan diganti dengan data dari spreadsheet)
+        const sampleProperties = [
+            {
+                type: "Rumah",
+                price: "Rp 350.000.000",
+                address: "Jl. Merdeka No. 123, Jakarta",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                type: "Apartemen",
+                price: "Rp 550.000.000",
+                address: "Apartemen Taman Anggrek, Jakarta Barat",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                type: "Ruko",
+                price: "Rp 1.200.000.000",
+                address: "Jl. Sudirman Kav. 25, Jakarta Selatan",
+                image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                type: "Tanah",
+                price: "Rp 800.000.000",
+                address: "Jl. Raya Bogor Km. 5, Jakarta Timur",
+                image: "https://images.unsplash.com/photo-1548352216-7d07009bb5c9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                type: "Kavling",
+                price: "Rp 250.000.000",
+                address: "BSD City, Tangerang Selatan",
+                image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                type: "Rumah",
+                price: "Rp 475.000.000",
+                address: "Perumahan Citra Garden, Bekasi",
+                image: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+            }
+        ];
+
+        // Fungsi untuk menampilkan galeri foto
+        function renderGallery(properties) {
+            const galleryContainer = document.getElementById('gallery-container');
+            
+            if (!properties || properties.length === 0) {
+                galleryContainer.innerHTML = `
+                    <div class="error">
+                        <p>Tidak ada foto properti yang ditemukan</p>
+                        <p>Silakan hubungi administrator jika Anda merasa ini kesalahan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            properties.forEach(property => {
+                html += `
+                    <div class="property-card">
+                        ${property.image ? 
+                            `<img src="${property.image}" alt="${property.type}" class="property-image">` : 
+                            `<div class="image-placeholder">Foto Tidak Tersedia</div>`
+                        }
+                        <div class="property-info">
+                            <span class="property-type">${property.type}</span>
+                            <div class="property-price">${property.price}</div>
+                            <div class="property-address">${property.address}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            galleryContainer.innerHTML = html;
+        }
+
+        // Fungsi untuk memuat data dari Google Sheets
+        function loadPropertiesData() {
+            // Di sini Anda akan menghubungkan dengan Google Sheets
+            // Untuk sementara, kita gunakan data contoh
+            renderGallery(sampleProperties);
+            
+            /* 
+            // Kode untuk mengambil data dari Google Sheets:
+            try {
+                const SPREADSHEET_ID = '1NadxFspxUmz8sdIpqmwCyjCKGfmMTpFCOYhErnbxZJQ';
+                const API_KEY = 'AIzaSyBkz_SNQpDZuDJfUZ9AxbBm1GagK5igXug';
+                
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Sheet1?key=${API_KEY}`;
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.values || data.values.length <= 1) {
+                            throw new Error('Tidak ada data properti yang ditemukan');
+                        }
+                        
+                        // Mengubah data array menjadi array of objects
+                        const headers = data.values[0];
+                        const properties = data.values.slice(1).map(row => {
+                            const obj = {};
+                            headers.forEach((header, i) => {
+                                obj[header] = row[i] || '';
+                            });
+                            return obj;
+                        });
+                        
+                        // Filter properti yang memiliki foto
+                        const propertiesWithPhotos = properties.filter(property => 
+                            property.Foto || property['Link Foto']
+                        );
+                        
+                        renderGallery(propertiesWithPhotos);
+                    })
+                    .catch(error => {
+                        console.error('Error loading properties:', error);
+                        document.getElementById('gallery-container').innerHTML = `
+                            <div class="error">
+                                <p>Gagal memuat data properti: ${error.message}</p>
+                                <p>Pastikan SPREADSHEET_ID dan API_KEY sudah diatur dengan benar.</p>
+                            </div>
+                        `;
+                    });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            */
+        }
+
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', loadPropertiesData);
+    </script>
+</body>
+</html>
